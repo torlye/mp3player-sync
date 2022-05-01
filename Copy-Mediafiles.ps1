@@ -73,7 +73,7 @@ function Get-MediaInfo([string]$filePath) {
 }
 
 function Skip-File([System.IO.FileInfo]$file, [string]$destinationFolder) {
-	$destinationPathFilter = Join-Path $destinationFolder $file.Name.Replace($file.Extension, ".*")
+	$destinationPathFilter = Join-Path $destinationFolder $file.Name.Replace($file.Extension, '.*').Replace('[', '``[').Replace(']', '``]')
 	return (Test-Path -Path $destinationPathFilter -PathType Leaf)
 }
 
@@ -95,7 +95,7 @@ function Convert-File([System.IO.FileInfo]$file, [string]$destinationFolder) {
 	
 	[string]$tempAudioFilePath = Convert-AudioFormat $file $samplingRate $bitDepth 
 	
-	Optimize-CoverImage $hasCover $tempAudioFilePath
+	Optimize-CoverImage $hasCover $file $tempAudioFilePath
 	
 	if ((Test-Path -PathType Container -Path $destinationFolder) -eq $false) {
 		New-Item -ItemType Directory -Force -Path $destinationFolder
@@ -130,13 +130,12 @@ function Convert-AudioFormat([System.IO.FileInfo]$file, [int]$samplingRate, [int
 	else {
 		Write-Host $file.Name 'does not require conversion'
 		$tempAudioFilePath += $file.Extension
-		#Write-Host "Copy '$($file.FullName)' to '$($tempAudioFilePath)'"
 		Copy-Item -LiteralPath $file.FullName -Destination $tempAudioFilePath
 	}
 	return $tempAudioFilePath
 }
 
-function Optimize-CoverImage([bool]$hasCover, [string]$audioFilePath) {
+function Optimize-CoverImage([bool]$hasCover, [System.IO.FileInfo]$sourceFile, [string]$audioFilePath) {
 	[string]$coverImgPath = $null
 	if ($hasCover) {
 		$coverImgPath = Export-CoverImage $audioFilePath
@@ -144,14 +143,14 @@ function Optimize-CoverImage([bool]$hasCover, [string]$audioFilePath) {
 	}
 	else {
 		# check for cover.jpg
-		$coverJpgPath = Join-Path $file.Directory.FullName "cover.jpg"
+		$coverJpgPath = Join-Path $sourceFile.Directory.FullName "cover.jpg"
 		
 		if (Test-Path -Path $coverJpgPath -PathType Leaf) {
 			$coverImgPath = $coverJpgPath
 			Write-Host "Using cover.jpg from source folder"
 		}
 		else {
-			Write-Error "No cover"
+			Write-Error "No cover found for:" $sourceFile.FullName
 			exit 1
 		}
 	}
