@@ -37,18 +37,23 @@ is embedded as cover art in the files in the destination folder.
 Implemented as a cross-platform PowerShell script. Tested mainly on Ubuntu Linux.
 
 ### External tools
-* Powershell 7, to run the script
-* ffmpeg, for transcoding audio files
-* mediainfo, to analyze the source audio files
-* kid3-cli, to read and write embedded cover art
+* PowerShell 7, to run the script
+* FFmpeg, for transcoding audio files
+* MediaInfo CLI, to analyze the source audio files
+* Kid3 CLI, to read and write embedded cover art
+* ImageMagick, to parse and convert the cover art
+
+These tools are all available on Windows and macOS, so in theory the script should work on those platforms.
 
 To install all prerequisites on Ubuntu, run:
 ```
-sudo apt install ffmpeg mediainfo kid3-cli
+sudo apt install ffmpeg mediainfo kid3-cli imagemagick
 sudo snap install powershell
-```  
+```
 
-These tools are all available on Windows and macOS, so in theory the script should work on those platforms.
+When installing the prerequisites on Windows, make sure to get the CLI version of MediaInfo. 
+Add the directory paths of each tool to the PATH environment variable.
+The ImageMagick installer comes with FFmpeg bundled, and the installer can add the directory to PATH for you.
 
 ## Configuration
 Source and destination paths are input arguments to the script. Other parameters are configurable by
