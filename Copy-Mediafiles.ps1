@@ -163,25 +163,29 @@ function Optimize-CoverImage([bool]$hasCover, [System.IO.FileInfo]$sourceFile, [
 
 function Export-CoverImage([string]$audioFilePath) {
 	$tempImgPath = Get-TempFilePath
-	kid3-cli $audioFilePath -c "get picture:$($tempImgPath.Replace("'", "\'"))" > $null
+	kid3-cli $audioFilePath -c "get picture:$(Convert-PathForKid3 $tempImgPath)" > $null
+	if (-not(Test-Path -Path $tempImgPath -PathType Leaf)) {
+		Write-Error "Cover image could not be extracted"
+		exit 1
+	}
 	kid3-cli $audioFilePath -c "remove picture" > $null #Remove superfluous images (there can be more than one)
 	#Write-Host "Exported from '$audioFilePath' to '$tempImgPath'"
 	return $tempImgPath
 }
 
 function Import-CoverImage([string]$audioFilePath, [string]$coverImgPath) {
-	kid3-cli $audioFilePath -c "set picture:$($coverImgPath.Replace("'", "\'")) ''"
+	kid3-cli $audioFilePath -c "set picture:$(Convert-PathForKid3 $coverImgPath) ''"
 }
 
 function Convert-CoverImage([string]$coverFileName) {
-	[int]$width = identify -format "%w" $coverFileName
-	$format = identify -format "%m" $coverFileName
+	[int]$width = magick identify -format "%w" $coverFileName
+	$format = magick identify -format "%m" $coverFileName
 	Write-Host "Cover is" $format "$($width)px"
 
 	if ((-not $supportedImageFormats.Contains($format)) -or $width -gt $maxImageSize) {
 		$convertedImgPath = Get-TempFilePath $targetImageFormat
 		$targetImageSize = [System.Math]::Min($width, $idealImageSize)
-		convert $coverFileName -resize "$($targetImageSize)x" -strip $convertedImgPath
+		magick convert $coverFileName -resize "$($targetImageSize)x" -strip $convertedImgPath
 
 		Write-Host "Cover converted to JPEG $($targetImageSize)px"
 		return $convertedImgPath
@@ -200,6 +204,10 @@ function Remove-IfTempFile([string]$filePath) {
 	if ($filePath.StartsWith($tempFolder) -and (Test-Path -PathType Leaf -Path $filePath)) {
 		Remove-Item $filePath
 	}
+}
+
+function Convert-PathForKid3([string]$path) {
+	return $path.Replace("\", "\\").Replace("'", "\'")
 }
 
 Convert-Folder $inputPath $outputPath
