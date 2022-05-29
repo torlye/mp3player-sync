@@ -212,10 +212,10 @@ function Convert-PathForKid3([string]$path) {
 
 function Invoke-ImageMagick([string[]]$arguments) {
 	if ($useMagickCommand) {
-		& 'magick' $arguments
+		return & 'magick' $arguments
 	}
 	else {
-		& $arguments
+		return & $arguments[0] $arguments[1..10]
 	}
 }
 
