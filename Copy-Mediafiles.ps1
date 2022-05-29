@@ -168,7 +168,7 @@ function Export-CoverImage([string]$audioFilePath) {
 		Write-Error "Cover image could not be extracted"
 		exit 1
 	}
-	kid3-cli $audioFilePath -c "remove picture" > $null #Remove superfluous images (there can be more than one)
+	kid3-cli $audioFilePath -c "set picture ''" > $null #Remove superfluous images (there can be more than one)
 	#Write-Host "Exported from '$audioFilePath' to '$tempImgPath'"
 	return $tempImgPath
 }
