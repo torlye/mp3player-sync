@@ -221,10 +221,10 @@ function Invoke-ImageMagick([string[]]$arguments) {
 
 function Test-ImageMagick() {
 	if (Test-ImageMagickCommand "magick") {
-		$useMagickCommand = $true
+		return $true
 	}
 	elseif (Test-ImageMagickCommand "identify") {
-		$useMagickCommand = $false
+		return $false
 	}
 	else {
 		Write-Error "ImageMagick not detected"
@@ -245,5 +245,5 @@ function Test-ImageMagickCommand([string]$command) {
 	}
 }
 
-Test-ImageMagick
+$useMagickCommand = Test-ImageMagick
 Convert-Folder $inputPath $outputPath
