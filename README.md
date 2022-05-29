@@ -34,7 +34,7 @@ is embedded as cover art in the files in the destination folder.
 
 ## Implementation
 
-Implemented as a cross-platform PowerShell script. Tested mainly on Ubuntu Linux.
+Implemented as a cross-platform PowerShell script. Tested mainly on Windows and Ubuntu Linux.
 
 ### External tools
 * PowerShell 7, to run the script
@@ -43,7 +43,7 @@ Implemented as a cross-platform PowerShell script. Tested mainly on Ubuntu Linux
 * Kid3 CLI, to read and write embedded cover art
 * ImageMagick, to parse and convert the cover art
 
-These tools are all available on Windows and macOS, so in theory the script should work on those platforms.
+These tools are all available on Windows, Linux, and macOS, so in theory the script should work on those platforms.
 
 To install all prerequisites on Ubuntu, run:
 ```
