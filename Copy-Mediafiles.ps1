@@ -178,14 +178,14 @@ function Import-CoverImage([string]$audioFilePath, [string]$coverImgPath) {
 }
 
 function Convert-CoverImage([string]$coverFileName) {
-	[int]$width = magick identify -format "%w" $coverFileName
-	$format = magick identify -format "%m" $coverFileName
+	[int]$width = Invoke-ImageMagick @("identify", "-format", "%w", $coverFileName)
+	$format = Invoke-ImageMagick @("identify", "-format", "%m", $coverFileName)
 	Write-Host "Cover is" $format "$($width)px"
 
 	if ((-not $supportedImageFormats.Contains($format)) -or $width -gt $maxImageSize) {
 		$convertedImgPath = Get-TempFilePath $targetImageFormat
 		$targetImageSize = [System.Math]::Min($width, $idealImageSize)
-		magick convert $coverFileName -resize "$($targetImageSize)x" -strip $convertedImgPath
+		Invoke-ImageMagick @("convert", $coverFileName, "-resize", "$($targetImageSize)x", "-strip", $convertedImgPath)
 
 		Write-Host "Cover converted to JPEG $($targetImageSize)px"
 		return $convertedImgPath
@@ -210,4 +210,31 @@ function Convert-PathForKid3([string]$path) {
 	return $path.Replace("\", "\\").Replace("'", "\'")
 }
 
+function Invoke-ImageMagick([string[]]$arguments) {
+	if ($useMagickCommand) {
+		& 'magick' $arguments
+	}
+	else {
+		& $arguments
+	}
+}
+
+function Test-ImageMagick() {
+	$out = magick -version | Join-String
+	if ($out.Contains("ImageMagick")) {
+		$useMagickCommand = $true
+	}
+	else {
+		$out = identify -version | Join-String
+		if ($out.Contains("ImageMagick")) {
+			$useMagickCommand = $false
+		}
+		else {
+			Write-Error "ImageMagick not detected"
+			exit 1
+		}
+	}
+}
+
+Test-ImageMagick
 Convert-Folder $inputPath $outputPath
