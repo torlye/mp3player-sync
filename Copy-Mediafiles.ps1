@@ -220,19 +220,28 @@ function Invoke-ImageMagick([string[]]$arguments) {
 }
 
 function Test-ImageMagick() {
-	$out = magick -version | Join-String
-	if ($out.Contains("ImageMagick")) {
+	if (Test-ImageMagickCommand "magick") {
 		$useMagickCommand = $true
 	}
+	elseif (Test-ImageMagickCommand "identify") {
+		$useMagickCommand = $false
+	}
 	else {
-		$out = identify -version | Join-String
+		Write-Error "ImageMagick not detected"
+		exit 1
+	}
+}
+
+function Test-ImageMagickCommand([string]$command) {
+	try {
+		$out = & $command '-version' | Join-String
 		if ($out.Contains("ImageMagick")) {
-			$useMagickCommand = $false
+			return $true
 		}
-		else {
-			Write-Error "ImageMagick not detected"
-			exit 1
-		}
+		return $false
+	}
+	catch {
+		return $false
 	}
 }
 
