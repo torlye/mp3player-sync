@@ -20,8 +20,8 @@ $maxSamplingRate = 48000
 $targetSamplingRate = 44100
 
 # If cover image is larger than $maxImageSize, resize to $idealImageSize
-$idealImageSize = 272
-$maxImageSize = 500
+$idealImageSize = 320
+$maxImageSize = 600
 
 # If cover image is not one of the supported formats $supportedImageFormats, convert to $targetImageFormat
 [string[]]$supportedImageFormats = "JPEG"
@@ -180,9 +180,10 @@ function Import-CoverImage([string]$audioFilePath, [string]$coverImgPath) {
 function Convert-CoverImage([string]$coverFileName) {
 	[int]$width = Invoke-ImageMagick @("identify", "-format", "%w", $coverFileName)
 	$format = Invoke-ImageMagick @("identify", "-format", "%m", $coverFileName)
-	Write-Host "Cover is" $format "$($width)px"
+	$interlace = Invoke-ImageMagick @("identify", "-format", "%[interlace]", $coverFileName)
+	Write-Host "Cover is" $format "$($width)px" "Interlace:$interlace"
 
-	if ((-not $supportedImageFormats.Contains($format)) -or $width -gt $maxImageSize) {
+	if ((-not $supportedImageFormats.Contains($format)) -or $width -gt $maxImageSize -or $interlace -eq "JPEG") {
 		$convertedImgPath = Get-TempFilePath $targetImageFormat
 		$targetImageSize = [System.Math]::Min($width, $idealImageSize)
 		Invoke-ImageMagick @("convert", $coverFileName, "-resize", "$($targetImageSize)x", "-strip", $convertedImgPath)
