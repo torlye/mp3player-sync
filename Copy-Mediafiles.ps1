@@ -174,7 +174,7 @@ function Export-CoverImage([string]$audioFilePath) {
 }
 
 function Import-CoverImage([string]$audioFilePath, [string]$coverImgPath) {
-	kid3-cli $audioFilePath -c "set picture:$(Convert-PathForKid3 $coverImgPath) ''"
+	kid3-cli $audioFilePath -c "set picture:'$(Convert-PathForKid3 $coverImgPath)' ''"
 }
 
 function Convert-CoverImage([string]$coverFileName) {
